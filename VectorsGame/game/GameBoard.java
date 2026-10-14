@@ -21,7 +21,7 @@ public class GameBoard {
 		{
 			for(int x = 0; x < boardSlots.length; x++)
 			{
-				System.out.print(GetBoardSlotStatus(x,y));
+				System.out.print(getBoardSlotStatus(x,y));
 			}
 			System.out.println();
 		}
@@ -36,10 +36,10 @@ public class GameBoard {
 		else newStatus = 2;
 		
 		
-		if(GetBoardSlotStatus(x, y) == 0)
+		if(getBoardSlotStatus(x, y) == 0)
 		{
 			playSuccessful = true;
-			SetBoardSlot(x, y, newStatus);
+			setBoardSlot(x, y, newStatus);
 			
 			
 		}
@@ -50,7 +50,7 @@ public class GameBoard {
 	
 	public void setBoardSlot(int x, int y, int status)
 	{
-		if(GetBoardSlotStatus(x, y) == status)
+		if(getBoardSlotStatus(x, y) == status)
 		{
 			System.out.print("Board Slot at (" + x + ", " + y + ") is already set to " + status);
 			return;
