@@ -1,61 +1,95 @@
 package game;
 
 public class GameBoard {
-	private int[][] boardSlots = new int[8][8]; // 0 is empty, 1 is player, 2 is ai.
+	public int currentPlayerScore;
+	public int currentComputerScore;
+	public int previousPlayerScore;
+	public int previousComputerScore;
 	
-	public GameBoard() {}
+	// 0 is empty
+	// 1 is player
+	// 2 is AI
+	private int[][] board;
 	
-	public GameBoard(int xSize, int ySize)
-	{
-		this.boardSlots = new int[xSize][ySize];
+	// Default constructor (8x8)
+	public GameBoard() {
+		this.board = new int[8][8];
+	}
+	// Argument constructor (custom dimension)
+	public GameBoard(int width, int height) {
+		this.board = new int[width][height];
 	}
 	
-	public int getBoardSlotStatus(int x, int y) {
-		return boardSlots[x][y];
+	public boolean place(int x, int y, boolean isPlayer) {
+		if (board[x][y] == 0) {
+			board[x][y] = (isPlayer ? 1 : 2);
+			return true;
+		}
+		return false;
+	}
+	
+	// Scans the board and determines scores
+	public void setScores() {
+		// Move scores to previous place
+		previousPlayerScore = currentPlayerScore;
+		previousComputerScore = currentComputerScore;
+		
+		// Sequences of 3: +4 points
+		// Sequences of 4: +6 points
+		// Sequences of 5: +10 points
+		// P P P P P P P P -> Sequence of 5 and sequence of 3, not 4 and 4
 	}
 	
 	public void printBoard() {
-		// NOT FINISHED
-		
-		for(int y = 0; y < boardSlots[0].length; y++)
-		{
-			for(int x = 0; x < boardSlots.length; x++)
-			{
-				System.out.print(getBoardSlotStatus(x,y));
+		System.out.println("**************************************");
+		System.out.println("* V E C T O R S                      *");
+		System.out.println("**************************************");
+		System.out.println(""); // Use Score class to get this data
+		System.out.println("**************************************");
+		System.out.println(""); // Call Vector score variables
+		System.out.println("**************************************");
+		System.out.println(""); // Call Vector turn variables
+		System.out.println("**************************************");
+
+		int y;
+		int x;
+		for (y = 0; y < board[0].length; y++) {
+			for (x = 0; x < board.length; x++) {
+				System.out.print(board[x][y]);
 			}
 			System.out.println();
 		}
-	}
-	
-	public boolean attemptPlay(int x, int y, boolean isPlayer)
-	{
-		boolean playSuccessful;
-		int newStatus;
 		
-		if(isPlayer) newStatus = 1;
-		else newStatus = 2;
-		
-		
-		if(getBoardSlotStatus(x, y) == 0)
-		{
-			playSuccessful = true;
-			setBoardSlot(x, y, newStatus);
-			
-			
-		}
-		else playSuccessful = false;
-		
-		return playSuccessful;
-	}
-	
-	public void setBoardSlot(int x, int y, int status)
-	{
-		if(getBoardSlotStatus(x, y) == status)
-		{
-			System.out.print("Board Slot at (" + x + ", " + y + ") is already set to " + status);
-			return;
-		}
-		
-		boardSlots[x][y] = status;
+		/*
+			**************************************
+			- V E C T O R S                      *
+			**************************************
+			- High Score: John – 123             *
+			**************************************
+			- Player Score:    15 Last Round   9 *
+			- Computer Score:   6 Last Round   3 *
+			**************************************
+			- Turn 7 of 20                       *
+			**************************************
+			  0   1   2   3   4   5   6   7
+			---------------------------------
+			|   | C |   |   | C |   |   |   | 0
+			---------------------------------
+			|   |   |   | X |   |   |   |   | 1
+			---------------------------------
+			|   |   |   | X |   |   |   |   | 2
+			---------------------------------
+			| C |   |   | X | X | X |   |   | 3
+			---------------------------------
+			|   |   |   |   |   | X |   |   | 4
+			---------------------------------
+			|   |   |   |   |   |   | C |   | 5
+			---------------------------------
+			|   |   |   |   |   |   | C |   | 6
+			---------------------------------
+			|   |   |   |   |   |   | C |   | 7
+			---------------------------------
+			Player(X) Turn (Row Col): 3 6
+		 */
 	}
 }
