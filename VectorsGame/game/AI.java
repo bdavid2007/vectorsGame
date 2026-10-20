@@ -2,9 +2,8 @@ package game;
 
 public class AI {
 	
-	public int[] GetBestMove(GameBoard board)
+	public void computerInput(GameBoard board)
 	{
-		//
-		return new int[0];
+		// ...
 	}
 }
