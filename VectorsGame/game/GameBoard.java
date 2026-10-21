@@ -3,10 +3,6 @@ package game;
 import java.util.ArrayList;
 import java.util.Random;
 
-// 0 is empty
-// 1 is player
-// 2 is computer
-
 public class GameBoard {
 	private Token[][] board;
 	private char[][] output;

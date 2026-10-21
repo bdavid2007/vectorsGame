@@ -8,9 +8,9 @@ public class Vectors {
 	public AI ai;
 	public int numRounds;
 
-	// TODO: Is building the header with asterisks mandatory?
+	// TODO:Q: Is building the header with asterisks mandatory?
 	// No
-	// Expand header with game board size
+	// TODO: Expand header with game board size
 	private String LINE = "**************************************";
 	private String CLEAR = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
 	
@@ -58,8 +58,7 @@ public class Vectors {
 		System.out.printf("%-37s*\n", highscoreStr);
 		System.out.println(LINE);
 
-		// TODO: "Last Round" has no colon
-		// Yes
+		// TODO: Add colon to "Last Round"
 		System.out.printf("- Player Score:%6d Last Round%4d *\n", this.gameBoard.currentPlayerScore, this.gameBoard.previousPlayerScore);
 		System.out.printf("- Computer Score:%4d Last Round%4d *\n", this.gameBoard.currentComputerScore, this.gameBoard.previousComputerScore);
 		System.out.println(LINE);
