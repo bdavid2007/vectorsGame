@@ -16,36 +16,21 @@ public class GameBoard {
 	public int previousPlayerScore;
 	public int previousComputerScore;
 
-	private int[][] legend = {
-		{5, 10},
-		{4, 6},
-		{3, 4}
-	};
-
-	public char[][] CHARS = {
-		/*0*/ {' ','x','c'},
-		/*1*/ {'─','│','┼'},
-			  //0   1   2   3   4   5   6   7   8   9
-		/*2*/ {'═','║','╔','╤','╗','╢','╝','╧','╚','╟'},
-		/*3*/ {'-','\\','|','/','X'},
-		/*4*/ {'→','↘','↓','↙','←','↖','↑','↗','.'}
-	};
-	
 	// Default constructor
 	public GameBoard() {
 		this.width = 8;
 		this.height = 8;
-		this.initBoard();
+		initBoard();
 	}
 	// Argument constructor
 	public GameBoard(int width, int height) {
 		this.width = width;
 		this.height = height;
-		this.initBoard();
+		initBoard();
 	}
 
 	private void initBoard() {
-		this.maxRounds = this.width * this.height / 2;
+		this.maxRounds = this.width * this.height / 2; // Rounds down
 
 		this.currentPlayerScore = 0;
 		this.currentComputerScore = 0;
@@ -93,19 +78,18 @@ public class GameBoard {
 			currentX += stepX;
 			currentY += stepY;
 		}
-		this.vectors.add(new Vector(this.board, this.CHARS, from, to, from.team));
+		this.vectors.add(new Vector(this.board, from, to, from.team));
 		return true;
 	}
 
 	public void scanBoard() {
-		// TODO: Should vectors optimize?
 		// Allow vectors to optimize between turns by clearing the array
 		this.vectors.clear();
 
 		// Scan the board every time for each possible vector length, guaranteeing that max length vectors are prioritized
 		int index;
-		for (index = 0; index < legend.length; index++) {
-			int targetLength = legend[index][0];
+		for (index = 0; index < Vectors.LEGEND.length; index++) {
+			int targetLength = Vectors.LEGEND[index][0];
 
 			int y;
 			int x;
@@ -127,7 +111,7 @@ public class GameBoard {
 
 		// See if any vectors can be extended
 		for (Vector vector : this.vectors) {
-			if (vector.length == legend[0][0]) continue;
+			if (vector.length == Vectors.LEGEND[0][0]) continue;
 
 			int fromX = vector.from.x;
 			int fromY = vector.from.y;
@@ -137,7 +121,7 @@ public class GameBoard {
 			Token previous = null;
 			Token next = null;
 
-			if (vector.direction == this.CHARS[4][0]) { // →
+			if (vector.direction == Vectors.CHARS[4][0]) { // →
 				// Left of 'from'
 				if (fromX > 0) {
 					previous = this.board[fromX-1][fromY];
@@ -148,7 +132,7 @@ public class GameBoard {
 				}
 			}
 
-			if (vector.direction == this.CHARS[4][1]) { // ↘
+			if (vector.direction == Vectors.CHARS[4][1]) { // ↘
 				// Top-left 'from'
 				if (fromX > 0 && fromY > 0) {
 					previous = this.board[fromX-1][fromY-1];
@@ -159,7 +143,7 @@ public class GameBoard {
 				}
 			}
 
-			if (vector.direction == this.CHARS[4][2]) { // ↓
+			if (vector.direction == Vectors.CHARS[4][2]) { // ↓
 				// Above 'from'
 				if (fromY > 0) {
 					previous = this.board[fromX][fromY-1];
@@ -170,7 +154,7 @@ public class GameBoard {
 				}
 			}
 
-			if (vector.direction == this.CHARS[4][3]) { // ↙
+			if (vector.direction == Vectors.CHARS[4][3]) { // ↙
 				// Top-right 'from'
 				if (fromX < this.width-1 && fromY > 0) {
 					previous = this.board[fromX+1][fromY-1];
@@ -183,12 +167,14 @@ public class GameBoard {
 
 			// Apply previous
 			if (previous != null && previous.team == vector.team && !isTokenInVectors(previous)) {
-				vector.updateVector(this.board, this.CHARS, previous, vector.to);
+				vector.updateVector(this.board, previous, vector.to);
+				System.out.println("Applied previous");
 			}
 
 			// Apply next
-			if (vector.length < legend[0][0] && next != null && next.team == vector.team && !isTokenInVectors(next)) {
-				vector.updateVector(this.board, this.CHARS, vector.from, next);
+			if (vector.length < Vectors.LEGEND[0][0] && next != null && next.team == vector.team && !isTokenInVectors(next)) {
+				vector.updateVector(this.board, vector.from, next);
+				System.out.println("Applied next");
 			}
 		}
 	}
@@ -210,90 +196,90 @@ public class GameBoard {
 			col = 0;
 			for (x = 2; x < this.output[0].length; x += 4) {
 				// Middle
-				this.output[y][x-1] = this.CHARS[0][0];
-				this.output[y][x+1] = this.CHARS[0][0];
+				this.output[y][x-1] = Vectors.CHARS[0][0];
+				this.output[y][x+1] = Vectors.CHARS[0][0];
 				if (board[col][row].team == 1) {
-					this.output[y][x] = this.CHARS[0][1]; // x
+					this.output[y][x] = Vectors.CHARS[0][1]; // x
 				} else if (board[col][row].team == 2) {
-					this.output[y][x] = this.CHARS[0][2]; // c
+					this.output[y][x] = Vectors.CHARS[0][2]; // c
 				} else {
-					this.output[y][x] = this.CHARS[0][0];
+					this.output[y][x] = Vectors.CHARS[0][0];
 				}
 
 				// Top-left
 				if (row == 0 && col == 0) {
-					this.output[y-1][x-2] = this.CHARS[2][2]; // ╔
+					this.output[y-1][x-2] = Vectors.CHARS[2][2]; // ╔
 				} else if (row == 0 && col > 0) {
-					this.output[y-1][x-2] = this.CHARS[2][3]; // ╤
+					this.output[y-1][x-2] = Vectors.CHARS[2][3]; // ╤
 				} else if (col == 0) {
-					this.output[y-1][x-2] = this.CHARS[2][9]; // ╟
+					this.output[y-1][x-2] = Vectors.CHARS[2][9]; // ╟
 				} else {
-					this.output[y-1][x-2] = this.CHARS[1][2]; // ┼
+					this.output[y-1][x-2] = Vectors.CHARS[1][2]; // ┼
 				}
 
 				// Top
 				if (row == 0) {
 					// ═
-					this.output[y-1][x-1] = this.CHARS[2][0];
-					this.output[y-1][x]   = this.CHARS[2][0];
-					this.output[y-1][x+1] = this.CHARS[2][0];
+					this.output[y-1][x-1] = Vectors.CHARS[2][0];
+					this.output[y-1][x]   = Vectors.CHARS[2][0];
+					this.output[y-1][x+1] = Vectors.CHARS[2][0];
 				} else {
 					// ─
-					this.output[y-1][x-1] = this.CHARS[1][0];
-					this.output[y-1][x]   = this.CHARS[1][0];
-					this.output[y-1][x+1] = this.CHARS[1][0];
+					this.output[y-1][x-1] = Vectors.CHARS[1][0];
+					this.output[y-1][x]   = Vectors.CHARS[1][0];
+					this.output[y-1][x+1] = Vectors.CHARS[1][0];
 				}
 
 				// Top-right
 				if (row == 0 && col == this.width-1) {
-					this.output[y-1][x+2] = this.CHARS[2][4]; // ╗
+					this.output[y-1][x+2] = Vectors.CHARS[2][4]; // ╗
 				} else if (row > 0 && col == this.width-1) {
-					this.output[y-1][x+2] = this.CHARS[2][5]; // ╢
+					this.output[y-1][x+2] = Vectors.CHARS[2][5]; // ╢
 				} else {
-					this.output[y-1][x+2] = this.CHARS[1][2]; // ┼
+					this.output[y-1][x+2] = Vectors.CHARS[1][2]; // ┼
 				}
 
 				// Right
 				if (col == this.width-1) {
-					this.output[y][x+2] = this.CHARS[2][1]; // ║
+					this.output[y][x+2] = Vectors.CHARS[2][1]; // ║
 				} else {
-					this.output[y][x+2] = this.CHARS[1][1]; // │
+					this.output[y][x+2] = Vectors.CHARS[1][1]; // │
 				}
 
 				// Bottom-right
 				if (row == this.height-1 && col == this.width-1) {
-					this.output[y+1][x+2] = this.CHARS[2][6]; // ╝
+					this.output[y+1][x+2] = Vectors.CHARS[2][6]; // ╝
 				} else if (row == this.height-1 && col < this.width-1) {
-					this.output[y+1][x+2] = this.CHARS[2][7]; // ╧
+					this.output[y+1][x+2] = Vectors.CHARS[2][7]; // ╧
 				} else {
-					this.output[y+1][x+2] = this.CHARS[1][2]; // ┼
+					this.output[y+1][x+2] = Vectors.CHARS[1][2]; // ┼
 				}
 
 				// Bottom
 				if (row == this.height-1) {
 					// ═
-					this.output[y+1][x+1] = this.CHARS[2][0];
-					this.output[y+1][x]   = this.CHARS[2][0];
-					this.output[y+1][x-1] = this.CHARS[2][0];
+					this.output[y+1][x+1] = Vectors.CHARS[2][0];
+					this.output[y+1][x]   = Vectors.CHARS[2][0];
+					this.output[y+1][x-1] = Vectors.CHARS[2][0];
 				} else {
 					// ─
-					this.output[y+1][x+1] = this.CHARS[1][0];
-					this.output[y+1][x]   = this.CHARS[1][0];
-					this.output[y+1][x-1] = this.CHARS[1][0];
+					this.output[y+1][x+1] = Vectors.CHARS[1][0];
+					this.output[y+1][x]   = Vectors.CHARS[1][0];
+					this.output[y+1][x-1] = Vectors.CHARS[1][0];
 				}
 
 				// Bottom-left
 				if (row == this.height-1 && col == 0) {
-					this.output[y+1][x-2] = this.CHARS[2][8]; // ╚
+					this.output[y+1][x-2] = Vectors.CHARS[2][8]; // ╚
 				} else if (row < this.height-1) {
-					this.output[y+1][x-2] = this.CHARS[1][2]; // ┼
+					this.output[y+1][x-2] = Vectors.CHARS[1][2]; // ┼
 				}
 				
 				// Left
 				if (col == 0) {
-					this.output[y][x-2] = this.CHARS[2][1]; // ║
+					this.output[y][x-2] = Vectors.CHARS[2][1]; // ║
 				} else {
-					this.output[y][x-2] = this.CHARS[1][1]; // │
+					this.output[y][x-2] = Vectors.CHARS[1][1]; // │
 				}
 
 				col++;
@@ -308,78 +294,81 @@ public class GameBoard {
 					int centerX = token.x*4 + 2;
 					int centerY = token.y*2 + 1;
 
-					if (vector.direction == this.CHARS[4][0]) { // →, -
+					if (vector.direction == Vectors.CHARS[4][0]) { // →, -
 						if (token == vector.from) {
-							this.output[centerY][centerX+1] = this.CHARS[3][0];
-							this.output[centerY][centerX+2] = this.CHARS[3][0];
+							this.output[centerY][centerX+1] = Vectors.CHARS[3][0];
+							this.output[centerY][centerX+2] = Vectors.CHARS[3][0];
 						} else if (token == vector.to) {
-							this.output[centerY][centerX-1] = this.CHARS[3][0];
-							this.output[centerY][centerX-2] = this.CHARS[3][0];
+							this.output[centerY][centerX-1] = Vectors.CHARS[3][0];
+							this.output[centerY][centerX-2] = Vectors.CHARS[3][0];
 						} else {
-							this.output[centerY][centerX-1] = this.CHARS[3][0];
-							this.output[centerY][centerX+1] = this.CHARS[3][0];
-							this.output[centerY][centerX+2] = this.CHARS[3][0];
+							this.output[centerY][centerX-1] = Vectors.CHARS[3][0];
+							this.output[centerY][centerX+1] = Vectors.CHARS[3][0];
+							this.output[centerY][centerX+2] = Vectors.CHARS[3][0];
 						}
 					}
 
-					if (vector.direction == this.CHARS[4][1]) { // ↘, ╲
+					if (vector.direction == Vectors.CHARS[4][1]) { // ↘, ╲
 						if (token == vector.from) {
-							this.assignDiagonal(this.CHARS[3][1], centerY+1, centerX+2);
+							assignDiagonal(Vectors.CHARS[3][1], centerY+1, centerX+2);
 						} else if (token == vector.to) {
-							this.assignDiagonal(this.CHARS[3][1], centerY-1, centerX-2);
+							assignDiagonal(Vectors.CHARS[3][1], centerY-1, centerX-2);
 						} else {
-							this.assignDiagonal(this.CHARS[3][1], centerY+1, centerX+2);
+							assignDiagonal(Vectors.CHARS[3][1], centerY+1, centerX+2);
 						}
 					}
 
-					if (vector.direction == this.CHARS[4][2]) { // ↓, |
+					if (vector.direction == Vectors.CHARS[4][2]) { // ↓, |
 						if (token == vector.from) {
-							this.output[centerY+1][centerX] = this.CHARS[3][2];
+							this.output[centerY+1][centerX] = Vectors.CHARS[3][2];
 						} else if (token == vector.to) {
-							this.output[centerY-1][centerX] = this.CHARS[3][2];
+							this.output[centerY-1][centerX] = Vectors.CHARS[3][2];
 						} else {
-							this.output[centerY-1][centerX] = this.CHARS[3][2];
-							this.output[centerY+1][centerX] = this.CHARS[3][2];
+							this.output[centerY-1][centerX] = Vectors.CHARS[3][2];
+							this.output[centerY+1][centerX] = Vectors.CHARS[3][2];
 						}
 					}
 
-
-					if (vector.direction == this.CHARS[4][3]) { // ↙, ╱
+					if (vector.direction == Vectors.CHARS[4][3]) { // ↙, ╱
 						if (token == vector.from) {
-							this.assignDiagonal(this.CHARS[3][3], centerY+1, centerX-2);
+							assignDiagonal(Vectors.CHARS[3][3], centerY+1, centerX-2);
 						} else if (token == vector.to) {
-							this.assignDiagonal(this.CHARS[3][3], centerY-1, centerX+2);
+							assignDiagonal(Vectors.CHARS[3][3], centerY-1, centerX+2);
 						} else {
-							this.assignDiagonal(this.CHARS[3][3], centerY+1, centerX-2); 
+							assignDiagonal(Vectors.CHARS[3][3], centerY+1, centerX-2); 
 						}
 					}
 				}
 			}
 		}
 
-		// Print output contents
+		// Print column numbers
 		col = 0;
+		System.out.print("   ");
 		for (row = 0; row < this.width; row++) {
-			System.out.printf("  %d ", row);
+			System.out.printf(" %2d ", row);
 		}
 		System.out.println();
 
 		for (y = 0; y < this.output.length; y++) {
+			// Print row number
+			if ((y+1) % 2 == 0) {
+				System.out.printf("%2d ", col);
+				col++;
+			} else {
+				System.out.printf("   ", col);
+			}
+			// Print grid
 			for (x = 0; x < this.output[0].length; x++) {
 				System.out.print(this.output[y][x]);
 			}
-			if ((y+1) % 2 == 0) {
-				System.out.printf(" %d\n", col);
-				col++;
-			} else {
-				System.out.println();
-			}
+			System.out.println();
 		}
 	}
 
 	private void assignDiagonal(char glyph, int y, int x) {
-		if (this.output[y][x] != this.CHARS[1][2] /*┼*/ && this.output[y][x] != glyph) {
-			this.output[y][x] = this.CHARS[3][4]; // ╳
+		if (this.output[y][x] != Vectors.CHARS[1][2] /*┼*/ && this.output[y][x] != glyph) {
+			this.output[y][x] = Vectors.CHARS[3][4]; // ╳
 		} else {
 			this.output[y][x] = glyph;
 		}
@@ -391,10 +380,10 @@ public class GameBoard {
 
 		for (Vector vector : this.vectors) {
 			if (vector.team == 1) {
-				playerScore += vector.getScore(legend);
+				playerScore += vector.getScoreFromLength();
 			}
 			else if (vector.team == 2) {
-				computerScore += vector.getScore(legend);
+				computerScore += vector.getScoreFromLength();
 			}
 
 			if (printVectors) {
@@ -405,7 +394,7 @@ public class GameBoard {
 					if (token.x == vector.to.x && token.y == vector.to.y) header = "T";
 					System.out.printf("%s(%d,%d) ", header, token.x, token.y);
 				}
-				System.out.printf("\n    Length: %d (+%d)\n", vector.length, vector.getScore(legend));
+				System.out.printf("\n    Length: %d (+%d)\n", vector.length, vector.getScoreFromLength());
 			}
 		}
 
@@ -421,6 +410,17 @@ public class GameBoard {
 		// Manually create a board state
 		if (manualMode) {
 			inputBoard = new String[] {
+				"xxxxxxxx",
+				"xxxxxxxx",
+				"xxxxxxxx",
+				"xxxxxxxx",
+				"xxxxxxxx",
+				"xxxxxxxx",
+				"xxxxxxxx",
+				"xxxxxxxx",
+			};
+			/*
+			
 				"x......x",
 				".x....x.",
 				"..x..x..",
@@ -429,7 +429,7 @@ public class GameBoard {
 				".......x",
 				".......x",
 				"..xxxx.x",
-			};
+			*/
 		}
 		// Randomly create a board state
 		else {
@@ -439,20 +439,20 @@ public class GameBoard {
 			inputBoard = new String[this.height];
 			Random rand = new Random();
 			String row;
-			double random;
+			double randomDouble;
 			int y;
 			int x;
 			for (y = 0; y < this.height; y++) {
 				row = "";
 				for (x = 0; x < this.width; x++) {
 					char tokenChar;
-					random = rand.nextDouble();
-					if (random < (1.0/3.0)) {
+					randomDouble = rand.nextDouble();
+					if (randomDouble < (1.0/3.0)) {
 						tokenChar = '.';
-					} else if (random < (2.0/3.0)) {
-						tokenChar = this.CHARS[0][1]; // x
+					} else if (randomDouble < (2.0/3.0)) {
+						tokenChar = Vectors.CHARS[0][1]; // x
 					} else {
-						tokenChar = this.CHARS[0][2]; // c
+						tokenChar = Vectors.CHARS[0][2]; // c
 					}
 					row += tokenChar;
 				}
@@ -466,9 +466,9 @@ public class GameBoard {
 		for (y = 0; y < inputBoard.length; y++) {
 			for (x = 0; x < inputBoard[0].length(); x++) {
 				String tokenStr = inputBoard[y].substring(x, x+1);
-				if (tokenStr.equals(""+this.CHARS[0][1])) { // x
+				if (tokenStr.equals(""+Vectors.CHARS[0][1])) { // x
 					this.board[x][y].team = 1;
-				} else if (tokenStr.equals(""+this.CHARS[0][2])) { // c
+				} else if (tokenStr.equals(""+Vectors.CHARS[0][2])) { // c
 					this.board[x][y].team = 2;
 				} else {
 					this.board[x][y].team = 0;

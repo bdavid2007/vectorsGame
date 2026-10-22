@@ -9,12 +9,12 @@ public class Vector {
 	public Token[] containedTokens;
 
 	// Argument constructor
-	public Vector(Token[][] board, char[][] CHARS, Token from, Token to, int team) {
+	public Vector(Token[][] board, Token from, Token to, int team) {
 		this.team = team;
-		this.updateVector(board, CHARS, from, to);
+		updateVector(board, from, to);
 	}
 
-	public void updateVector(Token[][] board, char[][] CHARS, Token from, Token to) {
+	public void updateVector(Token[][] board, Token from, Token to) {
 		this.from = from;
 		this.to = to;
 
@@ -25,35 +25,35 @@ public class Vector {
 		// Determine direction of vector
 		if (changeInX > 0) {
 			if (changeInY > 0) {
-				this.direction = CHARS[4][1]; // ↘
+				this.direction = Vectors.CHARS[4][1]; // ↘
 			}
 			else if (changeInY == 0) {
-				this.direction = CHARS[4][0]; // →
+				this.direction = Vectors.CHARS[4][0]; // →
 			}
 			else {// if (changeInY < 0) {
-				this.direction = CHARS[4][7]; // ↗ Impossible
+				this.direction = Vectors.CHARS[4][7]; // ↗ Impossible
 			}
 		}
 		else if (changeInX == 0) {
 			if (changeInY > 0) {
-				this.direction = CHARS[4][2]; // ↓
+				this.direction = Vectors.CHARS[4][2]; // ↓
 			}
 			else if (changeInY == 0) {
-				this.direction = CHARS[4][8]; // . Impossible
+				this.direction = Vectors.CHARS[4][8]; // . Impossible
 			}
 			else {// if (changeInY < 0) {
-				this.direction = CHARS[4][6]; // ↑ Impossible
+				this.direction = Vectors.CHARS[4][6]; // ↑ Impossible
 			}
 		}
 		else {
 			if (changeInY > 0) {
-				this.direction = CHARS[4][3]; // ↙
+				this.direction = Vectors.CHARS[4][3]; // ↙
 			}
 			else if (changeInY == 0) {
-				this.direction = CHARS[4][4]; // ← Impossible
+				this.direction = Vectors.CHARS[4][4]; // ← Impossible
 			}
 			else {// if (changeInY < 0) {
-				this.direction = CHARS[4][5]; // ↖ Impossible
+				this.direction = Vectors.CHARS[4][5]; // ↖ Impossible
 			}
 		}
 
@@ -89,8 +89,8 @@ public class Vector {
 		return false;
 	}
 
-	public int getScore(int[][] legend) {
-		for (int[] item : legend) {
+	public int getScoreFromLength() {
+		for (int[] item : Vectors.LEGEND) {
 			if (item[0] == this.length) {
 				return item[1];
 			}
