@@ -23,7 +23,7 @@ public class User implements Serializable {
 	    FileInputStream inFile;
 	    ObjectInputStream in;
 	    try {
-	        inFile = new FileInputStream(this.FILE_NAME);
+	        inFile = new FileInputStream(User.FILE_NAME);
 	        in = new ObjectInputStream(inFile);
 	        
 	        User storedUser = (User)in.readObject();
@@ -46,7 +46,7 @@ public class User implements Serializable {
 		FileOutputStream outFile;
 		ObjectOutputStream out;
 		try {
-			outFile = new FileOutputStream(this.FILE_NAME);
+			outFile = new FileOutputStream(User.FILE_NAME);
 			out = new ObjectOutputStream(outFile);
 			out.writeObject(this);
 			out.close();
