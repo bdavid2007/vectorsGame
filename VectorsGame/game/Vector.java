@@ -80,7 +80,7 @@ public class Vector {
 		}
 	}
 
-	public boolean isTokenInVector(Token token) {
+	public boolean isTokenInSelf(Token token) {
 		for (Token containedToken : containedTokens) {
 			if (token.x == containedToken.x && token.y == containedToken.y) {
 				return true;

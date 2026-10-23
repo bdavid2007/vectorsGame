@@ -48,16 +48,16 @@ public class GameBoard {
 		}
 	}
 
-	private boolean isTokenInVectors(Token token) {
+	private boolean tokenCannotBePlaced(char currentVectorDirection, Token token) {
 		for (Vector vector : this.vectors) {
-			if (vector.isTokenInVector(token)) {
+			if (vector.isTokenInSelf(token) && currentVectorDirection == vector.direction) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private boolean examineNeighbor(Token from, int stepX, int stepY, int targetLength) {
+	private boolean examineNeighbor(Token from, char direction, int stepX, int stepY, int targetLength) {
 		int currentX = from.x;
 		int currentY = from.y;
 		Token to = from;
@@ -70,7 +70,8 @@ public class GameBoard {
 			}
 			Token activeToken = board[currentX][currentY];
 			
-			if (activeToken.team != from.team || isTokenInVectors(activeToken)) {
+			// If token is occupied by a vector AND the vector is the same direction, skip building current vector
+			if (activeToken.team != from.team || tokenCannotBePlaced(direction, activeToken)) {
 				return false;
 			}
 			to = activeToken;
@@ -90,91 +91,17 @@ public class GameBoard {
 		int index;
 		for (index = 0; index < Vectors.LEGEND.length; index++) {
 			int targetLength = Vectors.LEGEND[index][0];
-
 			int y;
 			int x;
 			for (y = 0; y < this.height; y++) {
 				for (x = 0; x < this.width; x++) {
 					if (board[x][y].team > 0) {
-						examineNeighbor(board[x][y],  1, 0, targetLength);	// →
-						examineNeighbor(board[x][y],  1, 1, targetLength);	// ↘
-						examineNeighbor(board[x][y],  0, 1, targetLength);	// ↓
-						examineNeighbor(board[x][y], -1, 1, targetLength);	// ↙
-					  //examineNeighbor(board[x][y], -1, 0, targetLength);	// ← impossible
-					  //examineNeighbor(board[x][y], -1,-1, targetLength);	// ↖ impossible
-					  //examineNeighbor(board[x][y],  0,-1, targetLength);	// ↑ impossible
-					  //examineNeighbor(board[x][y],  1,-1, targetLength);	// ↗ impossible
+						examineNeighbor(board[x][y],  '→',1, 0, targetLength); // →
+						examineNeighbor(board[x][y],  '↘',1, 1, targetLength); // ↘
+						examineNeighbor(board[x][y],  '↓',0, 1, targetLength); // ↓
+						examineNeighbor(board[x][y],  '↙', -1, 1, targetLength); // ↙
 					}
 				}
-			}
-		}
-
-		// See if any vectors can be extended
-		for (Vector vector : this.vectors) {
-			if (vector.length == Vectors.LEGEND[0][0]) continue;
-
-			int fromX = vector.from.x;
-			int fromY = vector.from.y;
-			int toX = vector.to.x;
-			int toY = vector.to.y;
-
-			Token previous = null;
-			Token next = null;
-
-			if (vector.direction == Vectors.CHARS[4][0]) { // →
-				// Left of 'from'
-				if (fromX > 0) {
-					previous = this.board[fromX-1][fromY];
-				}
-				// Right of 'to'
-				if (toX < this.width-1) {
-					next = this.board[toX+1][toY];
-				}
-			}
-
-			if (vector.direction == Vectors.CHARS[4][1]) { // ↘
-				// Top-left 'from'
-				if (fromX > 0 && fromY > 0) {
-					previous = this.board[fromX-1][fromY-1];
-				}
-				// Bottom-right 'to'
-				if (toX < this.width-1 && toY < this.height-1) {
-					next = this.board[toX+1][toY+1];
-				}
-			}
-
-			if (vector.direction == Vectors.CHARS[4][2]) { // ↓
-				// Above 'from'
-				if (fromY > 0) {
-					previous = this.board[fromX][fromY-1];
-				}
-				// Below 'to'
-				if (toY < this.height-1) {
-					next = this.board[toX][toY+1];
-				}
-			}
-
-			if (vector.direction == Vectors.CHARS[4][3]) { // ↙
-				// Top-right 'from'
-				if (fromX < this.width-1 && fromY > 0) {
-					previous = this.board[fromX+1][fromY-1];
-				}
-				// Bottom-left 'to'
-				if (toX > 0 && toY < this.height-1) {
-					next = this.board[toX-1][toY+1];
-				}
-			}
-
-			// Apply previous
-			if (previous != null && previous.team == vector.team && !isTokenInVectors(previous)) {
-				vector.updateVector(this.board, previous, vector.to);
-				System.out.println("Applied previous");
-			}
-
-			// Apply next
-			if (vector.length < Vectors.LEGEND[0][0] && next != null && next.team == vector.team && !isTokenInVectors(next)) {
-				vector.updateVector(this.board, vector.from, next);
-				System.out.println("Applied next");
 			}
 		}
 	}
@@ -410,17 +337,6 @@ public class GameBoard {
 		// Manually create a board state
 		if (manualMode) {
 			inputBoard = new String[] {
-				"xxxxxxxx",
-				"xxxxxxxx",
-				"xxxxxxxx",
-				"xxxxxxxx",
-				"xxxxxxxx",
-				"xxxxxxxx",
-				"xxxxxxxx",
-				"xxxxxxxx",
-			};
-			/*
-			
 				"x......x",
 				".x....x.",
 				"..x..x..",
@@ -429,7 +345,7 @@ public class GameBoard {
 				".......x",
 				".......x",
 				"..xxxx.x",
-			*/
+			};
 		}
 		// Randomly create a board state
 		else {
