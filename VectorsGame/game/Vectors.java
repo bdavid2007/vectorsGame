@@ -4,12 +4,12 @@ import java.util.Scanner;
 
 public class Vectors {
 	public static final boolean USE_ESCAPE_CODES = true;
-	public static final boolean[] DEV_CONFIG = new boolean[]{false, false};
+	public static final boolean[] DEV_SETBOARD_CONFIG = new boolean[]{false, false};
 
 	// "final" is the same as "const" in JavaScript
 	private final String CLEAR = (USE_ESCAPE_CODES)
 		? "\033[H\033[2J\033[3J" // ACTUALLY clears the terminal!!!
-		: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+		: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\\n\n\n\n\n\n\n\n\n";
 
 	private final int MINIMUM_HEADER_WIDTH = "- Computer Score:   6 Last Round   3 *".length();
 	private final int DEFAULT_NUM_ROUNDS = 20;
@@ -23,8 +23,8 @@ public class Vectors {
 	public static final char[][] CHARS = {
 		/*0*/ {' ','x','c'},
 		/*1*/ {'─','│','┼','┬','┴'},
-			  //0   1   2   3   4   5   6   7   8   9  10  11
-		/*2*/ {'═','║','╔','╤','╗','╢','╝','╧','╚','╟','╠','╣'},
+			  //0   1   2   3   4   5   6   7   8   9  10  11  12
+		/*2*/ {'═','║','╔','╤','╗','╢','╝','╧','╚','╟','╠','╣','╩'},
 		/*3*/ {'-','\\','|','/','X'},
 		/*4*/ {'→','↘','↓','↙','←','↖','↑','↗','.'}
 	};
@@ -43,7 +43,7 @@ public class Vectors {
 	
 	/// HEADER
 	
-	private String multiplyString(char c, int num) {
+	private String multiplyChar(char c, int num) {
 		String output = "";
 		int count;
 		for (count = 0; count < num; count++) {
@@ -59,24 +59,42 @@ public class Vectors {
 		);
 	}
 
-	private void printHeaderTop() {
-		this.headerStr += String.format("%s%s%s\n",
+	private void printHeaderTop(String title) {
+		int titleWidth = title.length() + 2;
+		int remainingWidth = this.headerWidth - titleWidth - 2;
+		int leftPadding = remainingWidth / 2;
+		int rightPadding = this.headerWidth - leftPadding - titleWidth - 2;
+
+		this.headerStr += String.format("%s%s%s%s%s\n%s%s %s %s%s\n%s%s%s%s%s%s%s\n",
+			// Top
+			multiplyChar(' ', leftPadding),
 			Vectors.CHARS[2][2],
-			multiplyString(Vectors.CHARS[2][0], this.headerWidth-2),
+			multiplyChar(Vectors.CHARS[2][0], titleWidth),
+			Vectors.CHARS[2][4],
+			multiplyChar(' ', rightPadding),
+
+			// Title
+			multiplyChar(' ', leftPadding),
+			Vectors.CHARS[2][1],
+			title,
+			Vectors.CHARS[2][1],
+			multiplyChar(' ', rightPadding),
+			
+			// Thick separator
+			Vectors.CHARS[2][2],
+			multiplyChar(Vectors.CHARS[2][0], leftPadding-1),
+			Vectors.CHARS[2][12],
+			multiplyChar(Vectors.CHARS[2][0], titleWidth),
+			Vectors.CHARS[2][12],
+			multiplyChar(Vectors.CHARS[2][0], rightPadding-1),
 			Vectors.CHARS[2][4]
 		);
 	}
-	private void printHeaderSeparatorThick() {
-		this.headerStr += String.format("%s%s%s\n",
-			Vectors.CHARS[2][10],
-			multiplyString(Vectors.CHARS[2][0], this.headerWidth-2),
-			Vectors.CHARS[2][11]
-		);
-	}
+
 	private void printHeaderBottom() {
 		this.headerStr += String.format("%s%s%s\n",
 			Vectors.CHARS[2][8],
-			multiplyString(Vectors.CHARS[2][0], this.headerWidth-2),
+			multiplyChar(Vectors.CHARS[2][0], this.headerWidth-2),
 			Vectors.CHARS[2][6]
 		);
 	}
@@ -105,9 +123,9 @@ public class Vectors {
 		// Top line
 		this.headerStr += String.format("%s%s%s%s%s\n",
 			Vectors.CHARS[2][9],
-			multiplyString(Vectors.CHARS[1][0], scoreSeparatorX),
+			multiplyChar(Vectors.CHARS[1][0], scoreSeparatorX),
 			Vectors.CHARS[1][3],
-			multiplyString(Vectors.CHARS[1][0], this.headerWidth - 3 - scoreSeparatorX),
+			multiplyChar(Vectors.CHARS[1][0], this.headerWidth - 3 - scoreSeparatorX),
 			Vectors.CHARS[2][5]
 		);
 
@@ -130,9 +148,9 @@ public class Vectors {
 		// Bottom line
 		this.headerStr += String.format("%s%s%s%s%s\n",
 			Vectors.CHARS[2][9],
-			multiplyString(Vectors.CHARS[1][0], scoreSeparatorX),
+			multiplyChar(Vectors.CHARS[1][0], scoreSeparatorX),
 			Vectors.CHARS[1][4],
-			multiplyString(Vectors.CHARS[1][0], this.headerWidth - 3 - scoreSeparatorX),
+			multiplyChar(Vectors.CHARS[1][0], this.headerWidth - 3 - scoreSeparatorX),
 			Vectors.CHARS[2][5]
 		);
 	}
@@ -146,9 +164,7 @@ public class Vectors {
 	}
 
 	private void printHeader() {
-		printHeaderTop();
-		printHeaderEntry("V E C T O R S");
-		printHeaderSeparatorThick();
+		printHeaderTop("V E C T O R S");
 		printHeaderHighscore();
 		printHeaderScores();
 		printHeaderTurns();
@@ -157,9 +173,8 @@ public class Vectors {
 	}
 
 	private void printHeaderConfig() {
-		printHeaderTop();
-		printHeaderEntry("Settings");
-		printHeaderEntry("(Leave blank for default)");
+		printHeaderTop("Settings");
+		printHeaderEntry(" (Leave blank for default values)");
 		printHeaderBottom();
 		printHeaderStr();
 	}
@@ -211,8 +226,8 @@ public class Vectors {
 
 		for (Vectors.currentRound = 1; Vectors.currentRound <= Vectors.numRounds+1; Vectors.currentRound++) {
 			// Toggle this function on to generate boards every turn
-			if (Vectors.DEV_CONFIG[0]) {
-				Vectors.gameBoard.dev_setBoard(Vectors.DEV_CONFIG[1]);
+			if (Vectors.DEV_SETBOARD_CONFIG[0]) {
+				Vectors.gameBoard.dev_setBoard(Vectors.DEV_SETBOARD_CONFIG[1]);
 			}
 
 			Vectors.gameBoard.scanBoard();
