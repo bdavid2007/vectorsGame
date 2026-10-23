@@ -3,8 +3,13 @@ package game;
 import java.util.Scanner;
 
 public class Vectors {
+	public boolean doEscapeCodes = false;
+
 	// "final" is the same as "const" in JavaScript
-	private final String CLEAR = "\033[H\033[2J\033[3J"; // ACTUALLY clears the terminal!!!
+	private final String CLEAR = (doEscapeCodes)
+		? "\033[H\033[2J\033[3J" // ACTUALLY clears the terminal!!!
+		: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+
 	private final int MINIMUM_HEADER_WIDTH = "- Computer Score:   6 Last Round   3 *".length();
 	private final int DEFAULT_NUM_ROUNDS = 20;
 
@@ -28,6 +33,9 @@ public class Vectors {
 	public static GameBoard gameBoard;
 	public static int currentRound;
 	public static int numRounds;
+	
+	public User user;
+	public User coolestUser;
 	
 	/// HEADER
 	
@@ -72,8 +80,8 @@ public class Vectors {
 	private void printHeaderScores() {
 		// This is really, really dumb, but it works
 		int scoreSeparatorX = Math.min(Math.max(this.headerWidth/2, 20), this.headerWidth - 19);
-		int leftNumWidth = scoreSeparatorX - 17;
-		int rightNumWidth = this.headerWidth - scoreSeparatorX - 16;
+		int leftWidth = scoreSeparatorX - 17;
+		int rightWidth = this.headerWidth - scoreSeparatorX - 16;
 
 		// Top line
 		System.out.printf("%s%s%s%s%s\n",
@@ -85,14 +93,14 @@ public class Vectors {
 		);
 
 		// Scores
-		System.out.printf("%s Player Score:%" + (leftNumWidth + 2) + "d %s Last Round:%" + rightNumWidth + "d %s\n",
+		System.out.printf("%s Player Score:%" + (leftWidth + 2) + "d %s Last Round:%" + rightWidth + "d %s\n",
 			Vectors.CHARS[2][1],
 			Vectors.gameBoard.currentPlayerScore,
 			Vectors.CHARS[1][1],
 			Vectors.gameBoard.previousPlayerScore,
 			Vectors.CHARS[2][1]
 		);
-		System.out.printf("%s Computer Score:%" + leftNumWidth + "d %s Last Round:%" + rightNumWidth + "d %s\n",
+		System.out.printf("%s Computer Score:%" + leftWidth + "d %s Last Round:%" + rightWidth + "d %s\n",
 			Vectors.CHARS[2][1],
 			Vectors.gameBoard.currentComputerScore,
 			Vectors.CHARS[1][1],
@@ -114,10 +122,14 @@ public class Vectors {
 		printHeaderTop();
 		printHeaderEntry("V E C T O R S");
 		printHeaderSeparatorThick();
-		String user = "John";
-		int highscore = 0;
-		printHeaderEntry("High Score: " + user + " - " + highscore);
+		if (coolestUser.name == null) {
+			printHeaderEntry("High Score: None");
+		} else {
+			printHeaderEntry("High Score: " + coolestUser.name + " - " + coolestUser.score);
+		}
+		
 		printHeaderScores();
+		
 		if (Vectors.currentRound > Vectors.numRounds) {
 			printHeaderEntry("Game over");
 		} else {
@@ -131,6 +143,10 @@ public class Vectors {
 	
 	public Vectors() {
 		this.scanner = new Scanner(System.in);
+		
+		this.user = new User();
+		this.coolestUser = new User();
+		this.coolestUser.loadUser();
 		
 		// Configure settings
 		System.out.println(this.CLEAR);
@@ -156,7 +172,6 @@ public class Vectors {
 			Thread.currentThread().interrupt();
 		}
 		System.out.println(this.CLEAR);
-
 
 		this.headerWidth = 7 + gameBoard.width*4;
 		if (this.headerWidth < this.MINIMUM_HEADER_WIDTH) {
@@ -184,7 +199,14 @@ public class Vectors {
 				ai.computerInput(Vectors.gameBoard);
 			}
 		}
+		inputName();
 		this.scanner.close();
+		
+		// Save score
+		this.user.score = Vectors.gameBoard.currentPlayerScore - Vectors.gameBoard.currentComputerScore;
+		if (this.user.score > this.coolestUser.score) {
+			this.user.saveUser();
+		}
 	}
 
 	/// INPUT
@@ -260,8 +282,10 @@ public class Vectors {
 				if (input.equals("")) {
 					Vectors.gameBoard = new GameBoard();
 					// Move cursor up one line and clear the line
-					System.out.print("\033[1A\r\033[K");
-					System.out.printf("  Board size (Width Height): %dx%d\n", Vectors.gameBoard.width, Vectors.gameBoard.height);
+					if (doEscapeCodes) {
+						System.out.print("\033[1A\r\033[K");
+						System.out.printf("  Board size (Width Height): %dx%d\n", Vectors.gameBoard.width, Vectors.gameBoard.height);
+					}
 					break;
 				}
 
@@ -299,12 +323,14 @@ public class Vectors {
 			try {
 				String input = this.scanner.nextLine().trim();
 
-				// If user inputs a blank string, execute default constructor
+				// If user inputs a blank string, assign default numRounds
 				if (input.equals("")) {
 					Vectors.numRounds = (Vectors.gameBoard.maxRounds < this.DEFAULT_NUM_ROUNDS ? Vectors.gameBoard.maxRounds : this.DEFAULT_NUM_ROUNDS);
 					// Move cursor up one line and clear the line
-					System.out.print("\033[1A\r\033[K");
-					System.out.printf("  Number of rounds (%s-%s): %d\n", 1, Vectors.gameBoard.maxRounds, Vectors.numRounds);
+					if (doEscapeCodes) {
+						System.out.print("\033[1A\r\033[K");
+						System.out.printf("  Number of rounds (%s-%s): %d\n", 1, Vectors.gameBoard.maxRounds, Vectors.numRounds);
+					}
 					break;
 				}
 
@@ -363,6 +389,26 @@ public class Vectors {
 			}
 			catch (Exception exception) {
 				System.out.printf("[!] (%d,%d) is invalid: %s\n\n", row, col, reason);
+			}
+		}
+	}
+
+	private void inputName() {
+		while (true) {
+			System.out.print("  Enter your name: ");
+			
+			try {
+				String input = this.scanner.nextLine().trim();
+
+				// If user inputs a blank string, try again
+				if (input.equals("")) {
+					throw new Exception();
+				}
+				this.user.name = input;
+				break;
+			}
+			catch (Exception exception) {
+				System.out.println("  [!] Name not allowed\n");
 			}
 		}
 	}
