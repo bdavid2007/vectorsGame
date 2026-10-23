@@ -271,26 +271,27 @@ public class GameBoard {
 
 		// Print column numbers
 		col = 0;
-		System.out.print("   ");
+		String outputStr = "   "; // Repeating multiple print statements is slow!
 		for (row = 0; row < this.width; row++) {
-			System.out.printf(" %2d ", row);
+			outputStr += String.format(" %2d ", row);
 		}
-		System.out.println();
 
+		// Print board
 		for (y = 0; y < this.output.length; y++) {
+			outputStr += "\n";
 			// Print row number
 			if ((y+1) % 2 == 0) {
-				System.out.printf("%2d ", col);
+				outputStr += String.format("%2d ", col);
 				col++;
 			} else {
-				System.out.printf("   ", col);
+				outputStr += "   ";
 			}
 			// Print grid
 			for (x = 0; x < this.output[0].length; x++) {
-				System.out.print(this.output[y][x]);
+				outputStr += this.output[y][x];
 			}
-			System.out.println();
 		}
+		System.out.println(outputStr);
 	}
 
 	private void assignDiagonal(char glyph, int y, int x) {

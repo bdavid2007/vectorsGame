@@ -3,10 +3,11 @@ package game;
 import java.util.Scanner;
 
 public class Vectors {
-	public boolean doEscapeCodes = false;
+	public static final boolean USE_ESCAPE_CODES = true;
+	public static final boolean[] DEV_CONFIG = new boolean[]{false, false};
 
 	// "final" is the same as "const" in JavaScript
-	private final String CLEAR = (doEscapeCodes)
+	private final String CLEAR = (USE_ESCAPE_CODES)
 		? "\033[H\033[2J\033[3J" // ACTUALLY clears the terminal!!!
 		: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
 
@@ -28,8 +29,11 @@ public class Vectors {
 		/*4*/ {'→','↘','↓','↙','←','↖','↑','↗','.'}
 	};
 
-	public Scanner scanner;
+	private Scanner scanner;
+	
 	private int headerWidth = MINIMUM_HEADER_WIDTH;
+	private String headerStr = "";
+
 	public static GameBoard gameBoard;
 	public static int currentRound;
 	public static int numRounds;
@@ -49,32 +53,47 @@ public class Vectors {
 	}
 
 	private void printHeaderEntry(String str) {
-		System.out.printf(
+		this.headerStr += String.format(
 			"%s %-" + (this.headerWidth-4) + "s %s\n",
 			Vectors.CHARS[2][1], str, Vectors.CHARS[2][1]
 		);
 	}
 
 	private void printHeaderTop() {
-		System.out.printf("%s%s%s\n",
+		this.headerStr += String.format("%s%s%s\n",
 			Vectors.CHARS[2][2],
 			multiplyString(Vectors.CHARS[2][0], this.headerWidth-2),
 			Vectors.CHARS[2][4]
 		);
 	}
 	private void printHeaderSeparatorThick() {
-		System.out.printf("%s%s%s\n",
+		this.headerStr += String.format("%s%s%s\n",
 			Vectors.CHARS[2][10],
 			multiplyString(Vectors.CHARS[2][0], this.headerWidth-2),
 			Vectors.CHARS[2][11]
 		);
 	}
 	private void printHeaderBottom() {
-		System.out.printf("%s%s%s\n",
+		this.headerStr += String.format("%s%s%s\n",
 			Vectors.CHARS[2][8],
 			multiplyString(Vectors.CHARS[2][0], this.headerWidth-2),
 			Vectors.CHARS[2][6]
 		);
+	}
+
+	private void printHeaderHighscore() {
+		if (coolestUser.name == null) {
+			printHeaderEntry("High Score: None");
+		}
+		else {
+			String highscoreEntry = "High Score: " + coolestUser.name + " - " + coolestUser.score;
+
+			for (int i = 0; i < highscoreEntry.length(); i += this.headerWidth - 4) {
+				int end = Math.min(i + this.headerWidth - 4, highscoreEntry.length());
+				String highscoreEntrySubstring = highscoreEntry.substring(i, end);
+				printHeaderEntry(highscoreEntrySubstring);
+			}
+		}
 	}
 
 	private void printHeaderScores() {
@@ -84,7 +103,7 @@ public class Vectors {
 		int rightWidth = this.headerWidth - scoreSeparatorX - 16;
 
 		// Top line
-		System.out.printf("%s%s%s%s%s\n",
+		this.headerStr += String.format("%s%s%s%s%s\n",
 			Vectors.CHARS[2][9],
 			multiplyString(Vectors.CHARS[1][0], scoreSeparatorX),
 			Vectors.CHARS[1][3],
@@ -93,14 +112,14 @@ public class Vectors {
 		);
 
 		// Scores
-		System.out.printf("%s Player Score:%" + (leftWidth + 2) + "d %s Last Round:%" + rightWidth + "d %s\n",
+		this.headerStr += String.format("%s Player Score:%" + (leftWidth + 2) + "d %s Last Round:%" + rightWidth + "d %s\n",
 			Vectors.CHARS[2][1],
 			Vectors.gameBoard.currentPlayerScore,
 			Vectors.CHARS[1][1],
 			Vectors.gameBoard.previousPlayerScore,
 			Vectors.CHARS[2][1]
 		);
-		System.out.printf("%s Computer Score:%" + leftWidth + "d %s Last Round:%" + rightWidth + "d %s\n",
+		this.headerStr += String.format("%s Computer Score:%" + leftWidth + "d %s Last Round:%" + rightWidth + "d %s\n",
 			Vectors.CHARS[2][1],
 			Vectors.gameBoard.currentComputerScore,
 			Vectors.CHARS[1][1],
@@ -109,7 +128,7 @@ public class Vectors {
 		);
 		
 		// Bottom line
-		System.out.printf("%s%s%s%s%s\n",
+		this.headerStr += String.format("%s%s%s%s%s\n",
 			Vectors.CHARS[2][9],
 			multiplyString(Vectors.CHARS[1][0], scoreSeparatorX),
 			Vectors.CHARS[1][4],
@@ -118,25 +137,36 @@ public class Vectors {
 		);
 	}
 
-	private void printHeader() {
-		printHeaderTop();
-		printHeaderEntry("V E C T O R S");
-		printHeaderSeparatorThick();
-		if (coolestUser.name == null) {
-			printHeaderEntry("High Score: None");
-		} else {
-			printHeaderEntry("High Score: " + coolestUser.name + " - " + coolestUser.score);
-		}
-		
-		printHeaderScores();
-		
+	private void printHeaderTurns() {
 		if (Vectors.currentRound > Vectors.numRounds) {
 			printHeaderEntry("Game over");
 		} else {
 			printHeaderEntry("Turn " + Vectors.currentRound + " of " + Vectors.numRounds);
 		}
-		
+	}
+
+	private void printHeader() {
+		printHeaderTop();
+		printHeaderEntry("V E C T O R S");
+		printHeaderSeparatorThick();
+		printHeaderHighscore();
+		printHeaderScores();
+		printHeaderTurns();
 		printHeaderBottom();
+		printHeaderStr();
+	}
+
+	private void printHeaderConfig() {
+		printHeaderTop();
+		printHeaderEntry("Settings");
+		printHeaderEntry("(Leave blank for default)");
+		printHeaderBottom();
+		printHeaderStr();
+	}
+
+	private void printHeaderStr() {
+		System.out.println(headerStr.substring(0, headerStr.length()-1));
+		this.headerStr = "";
 	}
 
 	/// GAME LOOP
@@ -150,10 +180,7 @@ public class Vectors {
 		
 		// Configure settings
 		System.out.println(this.CLEAR);
-		printHeaderTop();
-		printHeaderEntry("Settings");
-		printHeaderEntry("(Leave blank for default)");
-		printHeaderBottom();
+		printHeaderConfig();
 		inputBoardSize();
 		inputRounds();
 
@@ -184,7 +211,9 @@ public class Vectors {
 
 		for (Vectors.currentRound = 1; Vectors.currentRound <= Vectors.numRounds+1; Vectors.currentRound++) {
 			// Toggle this function on to generate boards every turn
-			//Vectors.gameBoard.dev_setBoard(true);
+			if (Vectors.DEV_CONFIG[0]) {
+				Vectors.gameBoard.dev_setBoard(Vectors.DEV_CONFIG[1]);
+			}
 
 			Vectors.gameBoard.scanBoard();
 			System.out.println(this.CLEAR);
@@ -282,7 +311,7 @@ public class Vectors {
 				if (input.equals("")) {
 					Vectors.gameBoard = new GameBoard();
 					// Move cursor up one line and clear the line
-					if (doEscapeCodes) {
+					if (USE_ESCAPE_CODES) {
 						System.out.print("\033[1A\r\033[K");
 						System.out.printf("  Board size (Width Height): %dx%d\n", Vectors.gameBoard.width, Vectors.gameBoard.height);
 					}
@@ -327,7 +356,7 @@ public class Vectors {
 				if (input.equals("")) {
 					Vectors.numRounds = (Vectors.gameBoard.maxRounds < this.DEFAULT_NUM_ROUNDS ? Vectors.gameBoard.maxRounds : this.DEFAULT_NUM_ROUNDS);
 					// Move cursor up one line and clear the line
-					if (doEscapeCodes) {
+					if (USE_ESCAPE_CODES) {
 						System.out.print("\033[1A\r\033[K");
 						System.out.printf("  Number of rounds (%s-%s): %d\n", 1, Vectors.gameBoard.maxRounds, Vectors.numRounds);
 					}
